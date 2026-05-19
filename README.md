@@ -71,3 +71,9 @@ export default defineConfig([
   },
 ])
 ```
+
+## Deployment
+- **Frontend**: Deployed on Cloudflare Pages (`https://sdnkalisalak01.pages.dev`).
+- **Backend API**: Deployed on Cloudflare Workers (`https://sdnkalisalak01-api.develzy.workers.dev`).
+- **Database**: Cloudflare D1 (`sdnkalisalak01-db`).
+
