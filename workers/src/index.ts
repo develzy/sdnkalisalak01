@@ -655,6 +655,11 @@ export default {
           if (!title || !image_url) {
             return new Response(JSON.stringify({ error: "Title and image url are required" }), { status: 400, headers: corsHeaders });
           }
+          // Auto-delete old Cloudinary photo if image changed
+          const oldGallery: any = await env.DB.prepare("SELECT cloudinary_id FROM gallery WHERE id=?").bind(id).first();
+          if (oldGallery?.cloudinary_id && cloudinary_id && oldGallery.cloudinary_id !== cloudinary_id) {
+            await deleteFromCloudinary(oldGallery.cloudinary_id, env);
+          }
           await env.DB.prepare(
             "UPDATE gallery SET title=?, description=?, image_url=?, cloudinary_id=? WHERE id=?"
           ).bind(title, description || null, image_url, cloudinary_id || null, id).run();
@@ -765,6 +770,13 @@ export default {
           const formData = await request.formData();
           const file = formData.get("file") as File;
 
+          // Optional folder from query param e.g. ?folder=gallery
+          const url = new URL(request.url);
+          const folderParam = url.searchParams.get("folder") || "";
+          const cloudinaryFolder = folderParam
+            ? `sdnkalisalak01/${folderParam}`
+            : "sdnkalisalak01";
+
           if (!file) {
             return new Response(JSON.stringify({ error: "No file uploaded" }), {
               status: 400,
@@ -773,7 +785,8 @@ export default {
           }
 
           const timestamp = Math.floor(Date.now() / 1000).toString();
-          const signatureRaw = `timestamp=${timestamp}${env.CLOUDINARY_API_SECRET}`;
+          // Include folder in signature
+          const signatureRaw = `folder=${cloudinaryFolder}&timestamp=${timestamp}${env.CLOUDINARY_API_SECRET}`;
           const signature = await sha1(signatureRaw);
 
           // Upload directly to Cloudinary using fetch
@@ -782,6 +795,7 @@ export default {
           cloudinaryFormData.append("timestamp", timestamp);
           cloudinaryFormData.append("api_key", env.CLOUDINARY_API_KEY);
           cloudinaryFormData.append("signature", signature);
+          cloudinaryFormData.append("folder", cloudinaryFolder);
 
           const cloudinaryRes = await fetch(
             `https://api.cloudinary.com/v1_1/${env.CLOUDINARY_CLOUD_NAME}/image/upload`,
@@ -905,6 +919,11 @@ export default {
           const { image_url, cloudinary_id, badge, title, description, order_weight } = body;
           if (!image_url || !badge || !title || !description) {
             return new Response(JSON.stringify({ error: "Missing required fields" }), { status: 400, headers: corsHeaders });
+          }
+          // Auto-delete old Cloudinary photo if image changed
+          const oldSlide: any = await env.DB.prepare("SELECT cloudinary_id FROM hero_slides WHERE id=?").bind(id).first();
+          if (oldSlide?.cloudinary_id && cloudinary_id && oldSlide.cloudinary_id !== cloudinary_id) {
+            await deleteFromCloudinary(oldSlide.cloudinary_id, env);
           }
           await env.DB.prepare(
             "UPDATE hero_slides SET image_url=?, cloudinary_id=?, badge=?, title=?, description=?, order_weight=? WHERE id=?"

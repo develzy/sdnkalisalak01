@@ -350,11 +350,15 @@ export const api = {
   // ----------------------------------------------------------------
   // IMAGE UPLOAD (CLOUDINARY SERVICE BACKEND PROXY)
   // ----------------------------------------------------------------
-  uploadImage: async (file: File): Promise<{ url: string; public_id: string }> => {
+  uploadImage: async (file: File, folder?: string): Promise<{ url: string; public_id: string }> => {
     const formData = new FormData();
     formData.append("file", file);
 
-    const res = await fetch(`${API_BASE}/api/admin/upload`, {
+    const endpoint = folder
+      ? `${API_BASE}/api/admin/upload?folder=${encodeURIComponent(folder)}`
+      : `${API_BASE}/api/admin/upload`;
+
+    const res = await fetch(endpoint, {
       method: "POST",
       headers: getHeaders(true),
       body: formData,

@@ -400,10 +400,10 @@ export const AdminDashboard: React.FC = () => {
   };
 
   // Upload handler for Cloudinary
-  const handleCloudinaryUpload = async (file: File) => {
+  const handleCloudinaryUpload = async (file: File, folder?: string) => {
     setIsUploadingImage(true);
     try {
-      const result = await api.uploadImage(file);
+      const result = await api.uploadImage(file, folder);
       addToast("Gambar berhasil diunggah ke Cloudinary!", "success");
       return result; // contains { url, public_id }
     } catch (err: any) {
@@ -429,7 +429,7 @@ export const AdminDashboard: React.FC = () => {
 
         // If file uploaded, upload to Cloudinary first
         if (newsFile) {
-          const uploadRes = await handleCloudinaryUpload(newsFile);
+          const uploadRes = await handleCloudinaryUpload(newsFile, "news");
           finalUrl = uploadRes.url;
           finalCloudinaryId = uploadRes.public_id;
         }
@@ -506,7 +506,7 @@ export const AdminDashboard: React.FC = () => {
         let finalCloudinaryId = staffCloudinaryId;
 
         if (staffFile) {
-          const uploadRes = await handleCloudinaryUpload(staffFile);
+          const uploadRes = await handleCloudinaryUpload(staffFile, "staff");
           finalUrl = uploadRes.url;
           finalCloudinaryId = uploadRes.public_id;
         }
@@ -541,7 +541,7 @@ export const AdminDashboard: React.FC = () => {
           let finalUrl = galleryImageUrl;
           let finalCloudinaryId = galleryCloudinaryId;
           if (galleryFiles && galleryFiles.length > 0) {
-            const uploadRes = await handleCloudinaryUpload(galleryFiles[0]);
+            const uploadRes = await handleCloudinaryUpload(galleryFiles[0], "gallery");
             finalUrl = uploadRes.url;
             finalCloudinaryId = uploadRes.public_id;
           }
@@ -559,7 +559,7 @@ export const AdminDashboard: React.FC = () => {
             for (let i = 0; i < galleryFiles.length; i++) {
               const file = galleryFiles[i];
               try {
-                const uploadRes = await api.uploadImage(file);
+                const uploadRes = await api.uploadImage(file, "gallery");
                 await api.createGalleryItem({
                   title: galleryTitle || file.name.split(".")[0],
                   description: galleryDesc || `Dokumentasi foto kegiatan SDN Kalisalak 01`,
@@ -673,7 +673,7 @@ export const AdminDashboard: React.FC = () => {
       let finalCloudinaryId = slideCloudinaryId;
 
       if (slideFile) {
-        const uploadRes = await handleCloudinaryUpload(slideFile);
+        const uploadRes = await handleCloudinaryUpload(slideFile, "slides");
         finalUrl = uploadRes.url;
         finalCloudinaryId = uploadRes.public_id;
       }
