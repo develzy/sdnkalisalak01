@@ -58,3 +58,23 @@ export const DetailSkeleton: React.FC = () => {
     </div>
   );
 };
+
+interface SkeletonProps {
+  width?: string;
+  height?: string;
+  style?: React.CSSProperties;
+}
+
+export const Skeleton: React.FC<SkeletonProps> = ({ width = "100%", height = "16px", style }) => {
+  return (
+    <div
+      className="skeleton"
+      style={{
+        width,
+        height,
+        borderRadius: "4px",
+        ...style
+      }}
+    ></div>
+  );
+};

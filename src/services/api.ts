@@ -349,4 +349,32 @@ export const api = {
 
     return await res.json();
   },
+
+  // ----------------------------------------------------------------
+  // SCHOOL PROFILE
+  // ----------------------------------------------------------------
+  getProfile: async (): Promise<any> => {
+    const res = await fetch(`${API_BASE}/api/profile`, {
+      method: "GET",
+      headers: getHeaders(),
+    });
+    if (!res.ok) {
+      const err = await res.json();
+      throw new Error(err.error || "Gagal memuat profil sekolah");
+    }
+    return await res.json();
+  },
+
+  updateProfile: async (data: any): Promise<{ success: boolean }> => {
+    const res = await fetch(`${API_BASE}/api/profile`, {
+      method: "PUT",
+      headers: getHeaders(),
+      body: JSON.stringify(data),
+    });
+    if (!res.ok) {
+      const err = await res.json();
+      throw new Error(err.error || "Gagal memperbarui profil sekolah");
+    }
+    return await res.json();
+  },
 };

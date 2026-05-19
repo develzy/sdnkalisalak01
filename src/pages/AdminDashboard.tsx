@@ -15,7 +15,8 @@ import {
   Eye,
   EyeOff,
   Upload,
-  X
+  X,
+  School
 } from "lucide-react";
 import { api } from "../services/api";
 import { Toast } from "../components/Toast";
@@ -36,7 +37,23 @@ export const AdminDashboard: React.FC = () => {
   const [isLoggingIn, setIsLoggingIn] = useState(false);
 
   // Active Tab
-  const [activeTab, setActiveTab] = useState<"stats" | "news" | "announcements" | "events" | "staff" | "gallery">("stats");
+  const [activeTab, setActiveTab] = useState<"stats" | "news" | "announcements" | "events" | "staff" | "gallery" | "profile">("stats");
+
+  // School Profile Form State
+  const [profNama, setProfNama] = useState("");
+  const [profNpsn, setProfNpsn] = useState("");
+  const [profAkreditasi, setProfAkreditasi] = useState("");
+  const [profBentuk, setProfBentuk] = useState("");
+  const [profStatus, setProfStatus] = useState("");
+  const [profJenjang, setProfJenjang] = useState("");
+  const [profSkPendirian, setProfSkPendirian] = useState("");
+  const [profKurikulum, setProfKurikulum] = useState("");
+  const [profAlamat, setProfAlamat] = useState("");
+  const [profSejarah, setProfSejarah] = useState("");
+  const [profVisi, setProfVisi] = useState("");
+  const [profMisi, setProfMisi] = useState("");
+  const [profFasilitas, setProfFasilitas] = useState("");
+  const [isSavingProfile, setIsSavingProfile] = useState(false);
 
   // Data States
   const [stats, setStats] = useState<any>({ news: 0, announcements: 0, events: 0, staff: 0, gallery: 0, views: 0 });
@@ -142,6 +159,23 @@ export const AdminDashboard: React.FC = () => {
         } else if (activeTab === "gallery") {
           const galData = await api.getGallery();
           setGallery(galData);
+        } else if (activeTab === "profile") {
+          const profileData = await api.getProfile();
+          if (profileData) {
+            setProfNama(profileData.nama_sekolah);
+            setProfNpsn(profileData.npsn);
+            setProfAkreditasi(profileData.akreditasi);
+            setProfBentuk(profileData.bentuk_pendidikan);
+            setProfStatus(profileData.status_sekolah);
+            setProfJenjang(profileData.jenjang_pendidikan);
+            setProfSkPendirian(profileData.sk_pendirian);
+            setProfKurikulum(profileData.kurikulum);
+            setProfAlamat(profileData.alamat);
+            setProfSejarah(profileData.sejarah);
+            setProfVisi(profileData.visi);
+            setProfMisi(profileData.misi);
+            setProfFasilitas(profileData.fasilitas);
+          }
         }
       } catch (err: any) {
         console.error(err);
@@ -180,6 +214,34 @@ export const AdminDashboard: React.FC = () => {
     api.logout();
     setIsLoggedIn(false);
     addToast("Anda telah keluar dari panel admin.", "info");
+  };
+
+  const handleSaveProfile = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSavingProfile(true);
+    try {
+      await api.updateProfile({
+        nama_sekolah: profNama,
+        npsn: profNpsn,
+        akreditasi: profAkreditasi,
+        bentuk_pendidikan: profBentuk,
+        status_sekolah: profStatus,
+        jenjang_pendidikan: profJenjang,
+        sk_pendirian: profSkPendirian,
+        kurikulum: profKurikulum,
+        alamat: profAlamat,
+        sejarah: profSejarah,
+        visi: profVisi,
+        misi: profMisi,
+        fasilitas: profFasilitas
+      });
+      addToast("Profil sekolah berhasil diperbarui!", "success");
+    } catch (err: any) {
+      console.error(err);
+      addToast(err.message || "Gagal memperbarui profil", "danger");
+    } finally {
+      setIsSavingProfile(false);
+    }
   };
 
   // Open modals with prefilled data or reset states
@@ -609,6 +671,9 @@ export const AdminDashboard: React.FC = () => {
           <button onClick={() => setActiveTab("gallery")} className={`dashboard-tab-btn ${activeTab === "gallery" ? "active" : ""}`}>
             <ImageIcon size={16} /> Kelola Galeri
           </button>
+          <button onClick={() => setActiveTab("profile")} className={`dashboard-tab-btn ${activeTab === "profile" ? "active" : ""}`}>
+            <School size={16} /> Profil Sekolah
+          </button>
         </aside>
 
         {/* Content Panel */}
@@ -675,7 +740,7 @@ export const AdminDashboard: React.FC = () => {
           )}
 
           {/* CRUD TABLES (News, Ann, Event, Staff, Gallery) */}
-          {activeTab !== "stats" && (
+          {activeTab !== "stats" && activeTab !== "profile" && (
             <div>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px" }}>
                 <h2 style={{ fontSize: "20px", color: "var(--primary)", textTransform: "capitalize" }}>
@@ -843,6 +908,81 @@ export const AdminDashboard: React.FC = () => {
                   )}
                 </table>
               </div>
+            </div>
+          )}
+
+          {/* PROFILE PANEL */}
+          {activeTab === "profile" && (
+            <div>
+              <h2 style={{ fontSize: "20px", marginBottom: "20px", color: "var(--primary)" }}>Edit Profil & Identitas Sekolah</h2>
+              
+              <form onSubmit={handleSaveProfile} className="profile-card">
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "20px" }}>
+                  <div className="form-group">
+                    <label className="form-label">Nama Sekolah</label>
+                    <input type="text" className="form-control" value={profNama} onChange={(e) => setProfNama(e.target.value)} required />
+                  </div>
+                  <div className="form-group">
+                    <label className="form-label">NPSN</label>
+                    <input type="text" className="form-control" value={profNpsn} onChange={(e) => setProfNpsn(e.target.value)} required />
+                  </div>
+                  <div className="form-group">
+                    <label className="form-label">Akreditasi</label>
+                    <input type="text" className="form-control" value={profAkreditasi} onChange={(e) => setProfAkreditasi(e.target.value)} required />
+                  </div>
+                  <div className="form-group">
+                    <label className="form-label">Bentuk Pendidikan</label>
+                    <input type="text" className="form-control" value={profBentuk} onChange={(e) => setProfBentuk(e.target.value)} required />
+                  </div>
+                  <div className="form-group">
+                    <label className="form-label">Status Sekolah</label>
+                    <input type="text" className="form-control" value={profStatus} onChange={(e) => setProfStatus(e.target.value)} required />
+                  </div>
+                  <div className="form-group">
+                    <label className="form-label">Jenjang Pendidikan</label>
+                    <input type="text" className="form-control" value={profJenjang} onChange={(e) => setProfJenjang(e.target.value)} required />
+                  </div>
+                  <div className="form-group">
+                    <label className="form-label">Tanggal SK Pendirian</label>
+                    <input type="text" className="form-control" value={profSkPendirian} onChange={(e) => setProfSkPendirian(e.target.value)} required />
+                  </div>
+                  <div className="form-group">
+                    <label className="form-label">Kurikulum</label>
+                    <input type="text" className="form-control" value={profKurikulum} onChange={(e) => setProfKurikulum(e.target.value)} required />
+                  </div>
+                </div>
+
+                <div className="form-group" style={{ marginTop: "12px" }}>
+                  <label className="form-label">Alamat Lengkap</label>
+                  <textarea rows={2} className="form-control" value={profAlamat} onChange={(e) => setProfAlamat(e.target.value)} required />
+                </div>
+
+                <div className="form-group" style={{ marginTop: "12px" }}>
+                  <label className="form-label">Visi Sekolah</label>
+                  <textarea rows={2} className="form-control" value={profVisi} onChange={(e) => setProfVisi(e.target.value)} required />
+                </div>
+
+                <div className="form-group" style={{ marginTop: "12px" }}>
+                  <label className="form-label">Sejarah Sekolah (Gunakan editor visual)</label>
+                  <RichTextEditor value={profSejarah} onChange={setProfSejarah} placeholder="Tulis sejarah lengkap..." height="200px" />
+                </div>
+
+                <div className="form-group" style={{ marginTop: "12px" }}>
+                  <label className="form-label">Misi Sekolah (HTML list item, gunakan &lt;li&gt;per baris&lt;/li&gt;)</label>
+                  <RichTextEditor value={profMisi} onChange={setProfMisi} placeholder="<li>Misi 1</li>..." height="150px" />
+                </div>
+
+                <div className="form-group" style={{ marginTop: "12px" }}>
+                  <label className="form-label">Fasilitas Sekolah (HTML list item, gunakan &lt;li&gt;per baris&lt;/li&gt;)</label>
+                  <RichTextEditor value={profFasilitas} onChange={setProfFasilitas} placeholder="<li>Fasilitas 1</li>..." height="150px" />
+                </div>
+
+                <div style={{ marginTop: "24px", display: "flex", justifyContent: "flex-end" }}>
+                  <button type="submit" className="btn btn-primary" disabled={isSavingProfile}>
+                    {isSavingProfile ? "Menyimpan..." : "Simpan Perubahan Profil"}
+                  </button>
+                </div>
+              </form>
             </div>
           )}
         </main>
