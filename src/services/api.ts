@@ -329,6 +329,24 @@ export const api = {
     return await res.json();
   },
 
+  updateGalleryItem: async (id: number, data: {
+    title: string;
+    description?: string;
+    image_url: string;
+    cloudinary_id?: string;
+  }) => {
+    const res = await fetch(`${API_BASE}/api/gallery/${id}`, {
+      method: "PUT",
+      headers: getHeaders(),
+      body: JSON.stringify(data),
+    });
+    if (!res.ok) {
+      const err = await res.json();
+      throw new Error(err.error || "Gagal memperbarui foto galeri");
+    }
+    return await res.json();
+  },
+
   // ----------------------------------------------------------------
   // IMAGE UPLOAD (CLOUDINARY SERVICE BACKEND PROXY)
   // ----------------------------------------------------------------

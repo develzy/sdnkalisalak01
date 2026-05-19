@@ -646,6 +646,21 @@ export default {
           });
         }
 
+        if (pathParts.length === 3 && method === "PUT") {
+          if (!(await authorize(request, env))) {
+            return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers: corsHeaders });
+          }
+          const id = parseInt(pathParts[2]);
+          const { title, description, image_url, cloudinary_id } = (await request.json()) as any;
+          if (!title || !image_url) {
+            return new Response(JSON.stringify({ error: "Title and image url are required" }), { status: 400, headers: corsHeaders });
+          }
+          await env.DB.prepare(
+            "UPDATE gallery SET title=?, description=?, image_url=?, cloudinary_id=? WHERE id=?"
+          ).bind(title, description || null, image_url, cloudinary_id || null, id).run();
+          return new Response(JSON.stringify({ success: true }), { status: 200, headers: corsHeaders });
+        }
+
         if (pathParts.length === 3 && method === "DELETE") {
           if (!(await authorize(request, env))) {
             return new Response(JSON.stringify({ error: "Unauthorized" }), {

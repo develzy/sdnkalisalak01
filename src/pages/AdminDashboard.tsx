@@ -369,6 +369,12 @@ export const AdminDashboard: React.FC = () => {
       setStaffImageUrl(item.photo_url || "");
       setStaffCloudinaryId(item.cloudinary_id || "");
       setStaffFile(null);
+    } else if (activeTab === "gallery") {
+      setGalleryTitle(item.title);
+      setGalleryDesc(item.description || "");
+      setGalleryImageUrl(item.image_url || "");
+      setGalleryCloudinaryId(item.cloudinary_id || "");
+      setGalleryFiles(null);
     }
 
     setIsModalOpen(true);
@@ -511,25 +517,36 @@ export const AdminDashboard: React.FC = () => {
       // GALLERY CRUD (With Multi-Image support)
       // -------------------------------------------------------------
       else if (activeTab === "gallery") {
-        if (modalType === "add") {
+        if (modalType === "edit" && editId) {
+          // Edit existing gallery item
+          let finalUrl = galleryImageUrl;
+          let finalCloudinaryId = galleryCloudinaryId;
           if (galleryFiles && galleryFiles.length > 0) {
-            // Multiple images upload loop
+            const uploadRes = await handleCloudinaryUpload(galleryFiles[0]);
+            finalUrl = uploadRes.url;
+            finalCloudinaryId = uploadRes.public_id;
+          }
+          await api.updateGalleryItem(editId, {
+            title: galleryTitle,
+            description: galleryDesc,
+            image_url: finalUrl,
+            cloudinary_id: finalCloudinaryId || undefined,
+          });
+          addToast("Foto galeri berhasil diperbarui!", "success");
+        } else {
+          // Add new — multi-upload
+          if (galleryFiles && galleryFiles.length > 0) {
             addToast(`Memulai proses upload ${galleryFiles.length} foto kegiatan...`, "info");
-            
             for (let i = 0; i < galleryFiles.length; i++) {
               const file = galleryFiles[i];
               try {
-                // 1. Upload to Cloudinary
                 const uploadRes = await api.uploadImage(file);
-                
-                // 2. Save entry to D1
                 await api.createGalleryItem({
                   title: galleryTitle || file.name.split(".")[0],
                   description: galleryDesc || `Dokumentasi foto kegiatan SDN Kalisalak 01`,
                   image_url: uploadRes.url,
                   cloudinary_id: uploadRes.public_id,
                 });
-                
                 addToast(`[${i + 1}/${galleryFiles.length}] Foto "${file.name}" terunggah!`, "success");
               } catch (err) {
                 console.error(err);
@@ -537,7 +554,6 @@ export const AdminDashboard: React.FC = () => {
               }
             }
           } else {
-            // Single URL entry (no file selected)
             if (!galleryImageUrl) {
               addToast("Pilih file gambar atau masukkan URL gambar!", "warning");
               setIsLoading(false);
@@ -1137,8 +1153,9 @@ export const AdminDashboard: React.FC = () => {
                             <td style={{ fontWeight: 600 }}>{item.title}</td>
                             <td>{item.description || "-"}</td>
                             <td style={{ fontFamily: "monospace", fontSize: "11px" }}>{item.cloudinary_id || "URL Luar"}</td>
-                            <td>
-                              <button onClick={() => handleDeleteItem(item.id)} className="btn-icon" style={{ color: "var(--danger)" }}><Trash2 size={16} /></button>
+                            <td style={{ display: "flex", gap: "6px" }}>
+                              <button onClick={() => handleOpenEditModal(item)} className="btn-icon" style={{ color: "var(--primary)" }} title="Edit"><Edit size={16} /></button>
+                              <button onClick={() => handleDeleteItem(item.id)} className="btn-icon" style={{ color: "var(--danger)" }} title="Hapus"><Trash2 size={16} /></button>
                             </td>
                           </tr>
                         ))}
