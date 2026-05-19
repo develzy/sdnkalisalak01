@@ -254,6 +254,13 @@ export default {
 
           article.views += 1;
 
+          // Also increment today's daily view count
+          const today = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
+          await env.DB.prepare(
+            `INSERT INTO daily_views (view_date, count) VALUES (?, 1)
+             ON CONFLICT(view_date) DO UPDATE SET count = count + 1`
+          ).bind(today).run();
+
           return new Response(JSON.stringify(article), { status: 200, headers: corsHeaders });
         }
 
@@ -712,6 +719,10 @@ export default {
           const staffCount: any = await env.DB.prepare("SELECT COUNT(*) as count FROM staff").first();
           const galleryCount: any = await env.DB.prepare("SELECT COUNT(*) as count FROM gallery").first();
           const viewsSum: any = await env.DB.prepare("SELECT SUM(views) as count FROM news").first();
+          const today = new Date().toISOString().slice(0, 10);
+          const viewsToday: any = await env.DB.prepare(
+            "SELECT count FROM daily_views WHERE view_date = ?"
+          ).bind(today).first();
 
           return new Response(
             JSON.stringify({
@@ -721,6 +732,7 @@ export default {
               staff: staffCount?.count || 0,
               gallery: galleryCount?.count || 0,
               views: viewsSum?.count || 0,
+              views_today: viewsToday?.count || 0,
             }),
             { status: 200, headers: corsHeaders }
           );

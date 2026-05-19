@@ -63,7 +63,7 @@ export const AdminDashboard: React.FC = () => {
   const [isSavingProfile, setIsSavingProfile] = useState(false);
 
   // Data States
-  const [stats, setStats] = useState<any>({ news: 0, announcements: 0, events: 0, staff: 0, gallery: 0, views: 0 });
+  const [stats, setStats] = useState<any>({ news: 0, announcements: 0, events: 0, staff: 0, gallery: 0, views: 0, views_today: 0 });
   const [news, setNews] = useState<any[]>([]);
   const [categories, setCategories] = useState<any[]>([]);
   const [announcements, setAnnouncements] = useState<any[]>([]);
@@ -216,6 +216,18 @@ export const AdminDashboard: React.FC = () => {
     };
 
     loadData();
+  }, [isLoggedIn, activeTab]);
+
+  // Auto-refresh stats every 60 seconds when on stats tab
+  useEffect(() => {
+    if (!isLoggedIn || activeTab !== "stats") return;
+    const interval = setInterval(async () => {
+      try {
+        const statsData = await api.getStats();
+        setStats(statsData);
+      } catch { /* silent refresh fail */ }
+    }, 60000);
+    return () => clearInterval(interval);
   }, [isLoggedIn, activeTab]);
 
   // Login handler
@@ -825,8 +837,17 @@ export const AdminDashboard: React.FC = () => {
                 <div className="stat-card">
                   <div className="stat-icon" style={{ backgroundColor: "var(--secondary-dark)" }}><Eye size={20} /></div>
                   <div className="stat-info">
-                    <h4>Total View</h4>
+                    <h4 style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                      Total View
+                      <span style={{ display: "inline-flex", alignItems: "center", gap: "4px", fontSize: "10px", color: "#22c55e", fontWeight: 600 }}>
+                        <span style={{ width: "6px", height: "6px", borderRadius: "50%", backgroundColor: "#22c55e", display: "inline-block", animation: "pulse 2s infinite" }} />
+                        LIVE
+                      </span>
+                    </h4>
                     <p>{stats.views}</p>
+                    <span style={{ fontSize: "12px", color: "var(--text-muted)", fontWeight: 500 }}>
+                      Hari ini: <strong style={{ color: "var(--secondary)" }}>{stats.views_today}</strong> views
+                    </span>
                   </div>
                 </div>
                 <div className="stat-card">
