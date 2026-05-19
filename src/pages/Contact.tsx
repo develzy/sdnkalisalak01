@@ -88,7 +88,7 @@ export const Contact: React.FC = () => {
                   <MapPin size={24} style={{ color: "var(--secondary-dark)", flexShrink: 0 }} />
                   <div>
                     <strong style={{ display: "block" }}>Alamat Lengkap:</strong>
-                    <span>Kalisalak, Margasari, Kabupaten Tegal, Jawa Tengah 52463</span>
+                    <span>Jl. K. Abdul Latif, Kalisalak, Margasari, Kabupaten Tegal, Jawa Tengah 52463</span>
                   </div>
                 </li>
                 <li style={{ fontSize: "15px", marginBottom: "20px" }}>

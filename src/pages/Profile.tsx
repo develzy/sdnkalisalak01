@@ -96,23 +96,31 @@ export const Profile: React.FC = () => {
                 <tbody>
                   <tr style={{ borderBottom: "1px solid var(--border)" }}>
                     <td style={{ padding: "8px 0", fontWeight: 700 }}>Nama Sekolah</td>
-                    <td style={{ padding: "8px 0", textAlign: "right" }}>SDN KALISALAK 01</td>
+                    <td style={{ padding: "8px 0", textAlign: "right" }}>SD NEGERI KALISALAK 01</td>
                   </tr>
                   <tr style={{ borderBottom: "1px solid var(--border)" }}>
                     <td style={{ padding: "8px 0", fontWeight: 700 }}>NPSN</td>
-                    <td style={{ padding: "8px 0", textAlign: "right" }}>20325140</td>
+                    <td style={{ padding: "8px 0", textAlign: "right" }}>20325895</td>
                   </tr>
                   <tr style={{ borderBottom: "1px solid var(--border)" }}>
                     <td style={{ padding: "8px 0", fontWeight: 700 }}>Akreditasi</td>
-                    <td style={{ padding: "8px 0", textAlign: "right", color: "var(--success)", fontWeight: 700 }}>A (Sangat Baik)</td>
+                    <td style={{ padding: "8px 0", textAlign: "right", color: "var(--primary-dark)", fontWeight: 700 }}>B</td>
                   </tr>
                   <tr style={{ borderBottom: "1px solid var(--border)" }}>
                     <td style={{ padding: "8px 0", fontWeight: 700 }}>Bentuk Pendidikan</td>
-                    <td style={{ padding: "8px 0", textAlign: "right" }}>Sekolah Dasar (SD)</td>
+                    <td style={{ padding: "8px 0", textAlign: "right" }}>SD</td>
                   </tr>
                   <tr style={{ borderBottom: "1px solid var(--border)" }}>
                     <td style={{ padding: "8px 0", fontWeight: 700 }}>Status Sekolah</td>
-                    <td style={{ padding: "8px 0", textAlign: "right" }}>Negeri</td>
+                    <td style={{ padding: "8px 0", textAlign: "right" }}>NEGERI</td>
+                  </tr>
+                  <tr style={{ borderBottom: "1px solid var(--border)" }}>
+                    <td style={{ padding: "8px 0", fontWeight: 700 }}>Jenjang Pendidikan</td>
+                    <td style={{ padding: "8px 0", textAlign: "right" }}>DIKDAS</td>
+                  </tr>
+                  <tr style={{ borderBottom: "1px solid var(--border)" }}>
+                    <td style={{ padding: "8px 0", fontWeight: 700 }}>Tanggal SK Pendirian</td>
+                    <td style={{ padding: "8px 0", textAlign: "right" }}>01-01-1910</td>
                   </tr>
                   <tr style={{ borderBottom: "1px solid var(--border)" }}>
                     <td style={{ padding: "8px 0", fontWeight: 700 }}>Kurikulum</td>
@@ -121,7 +129,7 @@ export const Profile: React.FC = () => {
                   <tr>
                     <td style={{ padding: "8px 0", fontWeight: 700 }}>Alamat</td>
                     <td style={{ padding: "8px 0", textAlign: "right", fontSize: "11px", color: "var(--text-muted)" }}>
-                      Kalisalak, Margasari, Kab. Tegal 52463
+                      Jl. K. Abdul Latif, Kalisalak, Kec. Margasari, Kab. Tegal, Prov. Jawa Tengah
                     </td>
                   </tr>
                 </tbody>
