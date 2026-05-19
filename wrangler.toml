@@ -1,0 +1,14 @@
+name = "sdnkalisalak01-api"
+main = "workers/src/index.ts"
+compatibility_date = "2024-01-01"
+
+[vars]
+CLOUDINARY_CLOUD_NAME = "dkwaosfda"
+CLOUDINARY_API_KEY = "125821454392685"
+CLOUDINARY_API_SECRET = "MP8kWCxdzlXl3UyxzKQJicXQRNc"
+JWT_SECRET = "sdnkalisalak01_super_secret_jwt_key_2026"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "sdnkalisalak01-db"
+database_id = "01fb77c6-bd1f-403f-9abb-35b9756d5111"

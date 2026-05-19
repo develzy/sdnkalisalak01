@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/png" href="/icons/logo.png" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    
+    <!-- SEO Optimization -->
+    <title>SDN KALISALAK 01 - Portal Resmi Berita & Informasi Sekolah</title>
+    <meta name="description" content="Portal resmi SDN Kalisalak 01, Margasari, Kabupaten Tegal. Menyediakan informasi berita terbaru, prestasi siswa, pengumuman, agenda kegiatan, galeri sekolah, dan data guru." />
+    <meta name="keywords" content="SDN Kalisalak 01, SD Kalisalak 01, Margasari, Tegal, Sekolah Margasari, Portal Berita Sekolah Tegal, Sekolah Sehat Tegal" />
+    <meta name="author" content="SDN KALISALAK 01" />
+    
+    <!-- Open Graph (Facebook/WA) -->
+    <meta property="og:title" content="SDN KALISALAK 01 - Portal Resmi Berita & Informasi Sekolah" />
+    <meta property="og:description" content="Portal resmi SDN Kalisalak 01, Margasari, Kabupaten Tegal. Dapatkan berita terbaru, prestasi, pengumuman, dan galeri kegiatan." />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://sdnkalisalak01.sch.id" />
+    
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="SDN KALISALAK 01 - Portal Resmi Berita & Informasi Sekolah" />
+    <meta name="twitter:description" content="Portal resmi SDN Kalisalak 01, Margasari, Kabupaten Tegal." />
+
+    <!-- PWA Configurations -->
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="theme-color" content="#0f3c73" />
+    <link rel="apple-touch-icon" href="/icons/icon-192.png" />
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+
+    <!-- Service Worker Registration -->
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/sw.js')
+            .then(reg => console.log('Service Worker registered successfully: ', reg.scope))
+            .catch(err => console.error('Service Worker registration failed: ', err));
+        });
+      }
+    </script>
+  </body>
+</html>

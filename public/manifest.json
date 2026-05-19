@@ -1,0 +1,25 @@
+{
+  "name": "SDN KALISALAK 01",
+  "short_name": "SDNKalisalak01",
+  "description": "Portal Berita Resmi SDN KALISALAK 01 Margasari, Tegal",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f8fafc",
+  "theme_color": "#0f3c73",
+  "orientation": "any",
+  "categories": ["education", "news"],
+  "icons": [
+    {
+      "src": "/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
