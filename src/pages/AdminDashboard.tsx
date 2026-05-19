@@ -23,6 +23,7 @@ import { api } from "../services/api";
 import { Toast } from "../components/Toast";
 import type { ToastMessage } from "../components/Toast";
 import { RichTextEditor } from "../components/RichTextEditor";
+import { ConfirmDialog } from "../components/ConfirmDialog";
 
 
 export const AdminDashboard: React.FC = () => {
@@ -130,6 +131,24 @@ export const AdminDashboard: React.FC = () => {
 
   // Toast State
   const [toasts, setToasts] = useState<ToastMessage[]>([]);
+
+  // Confirm Dialog State
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [confirmTitle, setConfirmTitle] = useState("");
+  const [confirmMessage, setConfirmMessage] = useState("");
+  const [confirmAction, setConfirmAction] = useState<(() => void) | null>(null);
+
+  const openConfirm = (title: string, message: string, action: () => void) => {
+    setConfirmTitle(title);
+    setConfirmMessage(message);
+    setConfirmAction(() => action);
+    setConfirmOpen(true);
+  };
+
+  const handleConfirmed = () => {
+    setConfirmOpen(false);
+    confirmAction?.();
+  };
 
   const addToast = (msg: string, type: "success" | "warning" | "danger" | "info") => {
     const id = Date.now().toString();
@@ -583,35 +602,38 @@ export const AdminDashboard: React.FC = () => {
   };
 
   // Delete Action Handler (D1 item deletion triggers worker API which deletes from Cloudinary too)
-  const handleDeleteItem = async (id: number) => {
-    const confirmDel = window.confirm("Apakah Anda yakin ingin menghapus data ini?");
-    if (!confirmDel) return;
-
-    setIsLoading(true);
-    try {
-      if (activeTab === "news") {
-        await api.deleteNews(id);
-        setNews((prev) => prev.filter((item) => item.id !== id));
-      } else if (activeTab === "announcements") {
-        await api.deleteAnnouncement(id);
-        setAnnouncements((prev) => prev.filter((item) => item.id !== id));
-      } else if (activeTab === "events") {
-        await api.deleteEvent(id);
-        setEvents((prev) => prev.filter((item) => item.id !== id));
-      } else if (activeTab === "staff") {
-        await api.deleteStaff(id);
-        setStaff((prev) => prev.filter((item) => item.id !== id));
-      } else if (activeTab === "gallery") {
-        await api.deleteGalleryItem(id);
-        setGallery((prev) => prev.filter((item) => item.id !== id));
+  const handleDeleteItem = (id: number) => {
+    openConfirm(
+      "Hapus Data",
+      "Apakah Anda yakin ingin menghapus data ini? Tindakan ini tidak dapat dibatalkan dan gambar di Cloudinary akan ikut dihapus.",
+      async () => {
+        setIsLoading(true);
+        try {
+          if (activeTab === "news") {
+            await api.deleteNews(id);
+            setNews((prev) => prev.filter((item) => item.id !== id));
+          } else if (activeTab === "announcements") {
+            await api.deleteAnnouncement(id);
+            setAnnouncements((prev) => prev.filter((item) => item.id !== id));
+          } else if (activeTab === "events") {
+            await api.deleteEvent(id);
+            setEvents((prev) => prev.filter((item) => item.id !== id));
+          } else if (activeTab === "staff") {
+            await api.deleteStaff(id);
+            setStaff((prev) => prev.filter((item) => item.id !== id));
+          } else if (activeTab === "gallery") {
+            await api.deleteGalleryItem(id);
+            setGallery((prev) => prev.filter((item) => item.id !== id));
+          }
+          addToast("Data berhasil dihapus dari database & Cloudinary!", "success");
+        } catch (err: any) {
+          console.error(err);
+          addToast(err.message || "Gagal menghapus data", "danger");
+        } finally {
+          setIsLoading(false);
+        }
       }
-      addToast("Data berhasil dihapus dari database & Cloudinary!", "success");
-    } catch (err: any) {
-      console.error(err);
-      addToast(err.message || "Gagal menghapus data", "danger");
-    } finally {
-      setIsLoading(false);
-    }
+    );
   };
 
   // Slide form helpers
@@ -683,18 +705,23 @@ export const AdminDashboard: React.FC = () => {
     }
   };
 
-  const handleSlideDelete = async (id: number) => {
-    if (!window.confirm("Hapus slide ini dari beranda?")) return;
-    setIsLoading(true);
-    try {
-      await api.deleteSlide(id);
-      setSlides((prev) => prev.filter((s) => s.id !== id));
-      addToast("Slide berhasil dihapus!", "success");
-    } catch (err: any) {
-      addToast(err.message || "Gagal menghapus slide", "danger");
-    } finally {
-      setIsLoading(false);
-    }
+  const handleSlideDelete = (id: number) => {
+    openConfirm(
+      "Hapus Slide",
+      "Apakah Anda yakin ingin menghapus slide ini dari beranda? Foto di Cloudinary juga akan ikut dihapus.",
+      async () => {
+        setIsLoading(true);
+        try {
+          await api.deleteSlide(id);
+          setSlides((prev) => prev.filter((s) => s.id !== id));
+          addToast("Slide berhasil dihapus!", "success");
+        } catch (err: any) {
+          addToast(err.message || "Gagal menghapus slide", "danger");
+        } finally {
+          setIsLoading(false);
+        }
+      }
+    );
   };
 
   const formatSqlDate = (dateStr: string) => {
@@ -795,6 +822,18 @@ export const AdminDashboard: React.FC = () => {
           <Toast key={toast.id} message={toast.message} type={toast.type} onClose={() => removeToast(toast.id)} />
         ))}
       </div>
+
+      {/* Custom Confirm Dialog */}
+      <ConfirmDialog
+        isOpen={confirmOpen}
+        title={confirmTitle}
+        message={confirmMessage}
+        confirmLabel="Ya, Hapus"
+        cancelLabel="Batal"
+        variant="danger"
+        onConfirm={handleConfirmed}
+        onCancel={() => setConfirmOpen(false)}
+      />
 
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: "2px solid var(--border)", paddingBottom: "16px" }}>
         <div>
