@@ -812,10 +812,11 @@ export default {
           const body: any = await request.json();
           const {
             nama_sekolah, npsn, akreditasi, bentuk_pendidikan, status_sekolah,
-            jenjang_pendidikan, sk_pendirian, kurikulum, alamat, sejarah, visi, misi, fasilitas
+            jenjang_pendidikan, sk_pendirian, kurikulum, alamat, sejarah, visi, misi, fasilitas,
+            sambutan_nama, sambutan_jabatan, sambutan_foto, sambutan_judul, sambutan_isi
           } = body;
 
-          if (!nama_sekolah || !npsn || !akreditasi) {
+          if (!nama_sekolah || !npsn || !akreditasi || !sambutan_nama || !sambutan_isi) {
             return new Response(JSON.stringify({ error: "Missing required fields" }), {
               status: 400,
               headers: corsHeaders,
@@ -826,11 +827,13 @@ export default {
             UPDATE school_profile SET
               nama_sekolah = ?, npsn = ?, akreditasi = ?, bentuk_pendidikan = ?, status_sekolah = ?,
               jenjang_pendidikan = ?, sk_pendirian = ?, kurikulum = ?, alamat = ?, sejarah = ?,
-              visi = ?, misi = ?, fasilitas = ?
+              visi = ?, misi = ?, fasilitas = ?,
+              sambutan_nama = ?, sambutan_jabatan = ?, sambutan_foto = ?, sambutan_judul = ?, sambutan_isi = ?
             WHERE id = 1
           `).bind(
             nama_sekolah, npsn, akreditasi, bentuk_pendidikan, status_sekolah,
-            jenjang_pendidikan, sk_pendirian, kurikulum, alamat, sejarah, visi, misi, fasilitas
+            jenjang_pendidikan, sk_pendirian, kurikulum, alamat, sejarah, visi, misi, fasilitas,
+            sambutan_nama, sambutan_jabatan, sambutan_foto, sambutan_judul, sambutan_isi
           ).run();
 
           return new Response(JSON.stringify({ success: true }), { status: 200, headers: corsHeaders });

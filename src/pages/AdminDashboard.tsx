@@ -53,6 +53,12 @@ export const AdminDashboard: React.FC = () => {
   const [profVisi, setProfVisi] = useState("");
   const [profMisi, setProfMisi] = useState("");
   const [profFasilitas, setProfFasilitas] = useState("");
+  const [profSambutanNama, setProfSambutanNama] = useState("");
+  const [profSambutanJabatan, setProfSambutanJabatan] = useState("");
+  const [profSambutanFoto, setProfSambutanFoto] = useState("");
+  const [profSambutanJudul, setProfSambutanJudul] = useState("");
+  const [profSambutanIsi, setProfSambutanIsi] = useState("");
+  const [sambutanFotoFile, setSambutanFotoFile] = useState<File | null>(null);
   const [isSavingProfile, setIsSavingProfile] = useState(false);
 
   // Data States
@@ -175,6 +181,12 @@ export const AdminDashboard: React.FC = () => {
             setProfVisi(profileData.visi);
             setProfMisi(profileData.misi);
             setProfFasilitas(profileData.fasilitas);
+            setProfSambutanNama(profileData.sambutan_nama || "");
+            setProfSambutanJabatan(profileData.sambutan_jabatan || "");
+            setProfSambutanFoto(profileData.sambutan_foto || "");
+            setProfSambutanJudul(profileData.sambutan_judul || "");
+            setProfSambutanIsi(profileData.sambutan_isi || "");
+            setSambutanFotoFile(null);
           }
         }
       } catch (err: any) {
@@ -220,6 +232,15 @@ export const AdminDashboard: React.FC = () => {
     e.preventDefault();
     setIsSavingProfile(true);
     try {
+      let finalFotoUrl = profSambutanFoto;
+
+      // Upload sambutan photo if file selected
+      if (sambutanFotoFile) {
+        const uploadRes = await handleCloudinaryUpload(sambutanFotoFile);
+        finalFotoUrl = uploadRes.url;
+        setProfSambutanFoto(uploadRes.url);
+      }
+
       await api.updateProfile({
         nama_sekolah: profNama,
         npsn: profNpsn,
@@ -233,9 +254,15 @@ export const AdminDashboard: React.FC = () => {
         sejarah: profSejarah,
         visi: profVisi,
         misi: profMisi,
-        fasilitas: profFasilitas
+        fasilitas: profFasilitas,
+        sambutan_nama: profSambutanNama,
+        sambutan_jabatan: profSambutanJabatan,
+        sambutan_foto: finalFotoUrl,
+        sambutan_judul: profSambutanJudul,
+        sambutan_isi: profSambutanIsi
       });
       addToast("Profil sekolah berhasil diperbarui!", "success");
+      setSambutanFotoFile(null);
     } catch (err: any) {
       console.error(err);
       addToast(err.message || "Gagal memperbarui profil", "danger");
@@ -975,6 +1002,43 @@ export const AdminDashboard: React.FC = () => {
                 <div className="form-group" style={{ marginTop: "12px" }}>
                   <label className="form-label">Fasilitas Sekolah (HTML list item, gunakan &lt;li&gt;per baris&lt;/li&gt;)</label>
                   <RichTextEditor value={profFasilitas} onChange={setProfFasilitas} placeholder="<li>Fasilitas 1</li>..." height="150px" />
+                </div>
+
+                {/* SAMBUTAN KEPALA SEKOLAH FIELDS */}
+                <h3 style={{ fontSize: "16px", color: "var(--primary)", marginTop: "32px", marginBottom: "16px", borderTop: "1px solid var(--border)", paddingTop: "24px" }}>
+                  Sambutan Kepala Sekolah
+                </h3>
+
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "20px" }}>
+                  <div className="form-group">
+                    <label className="form-label">Nama Kepala Sekolah</label>
+                    <input type="text" className="form-control" value={profSambutanNama} onChange={(e) => setProfSambutanNama(e.target.value)} required />
+                  </div>
+                  <div className="form-group">
+                    <label className="form-label">Jabatan (Contoh: Kepala Sekolah SDN Kalisalak 01)</label>
+                    <input type="text" className="form-control" value={profSambutanJabatan} onChange={(e) => setProfSambutanJabatan(e.target.value)} required />
+                  </div>
+                </div>
+
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "20px", marginTop: "12px" }}>
+                  <div className="form-group">
+                    <label className="form-label">Upload Foto Baru (Cloudinary)</label>
+                    <input type="file" className="form-control" accept="image/*" onChange={(e) => setSambutanFotoFile(e.target.files ? e.target.files[0] : null)} />
+                  </div>
+                  <div className="form-group">
+                    <label className="form-label">URL Foto Saat Ini / Alternatif</label>
+                    <input type="text" className="form-control" value={profSambutanFoto} onChange={(e) => setProfSambutanFoto(e.target.value)} placeholder="https://..." />
+                  </div>
+                </div>
+
+                <div className="form-group" style={{ marginTop: "12px" }}>
+                  <label className="form-label">Judul Sambutan</label>
+                  <input type="text" className="form-control" value={profSambutanJudul} onChange={(e) => setProfSambutanJudul(e.target.value)} required />
+                </div>
+
+                <div className="form-group" style={{ marginTop: "12px" }}>
+                  <label className="form-label">Isi Sambutan (Gunakan editor visual)</label>
+                  <RichTextEditor value={profSambutanIsi} onChange={setProfSambutanIsi} placeholder="Tulis isi sambutan kepala sekolah..." height="200px" />
                 </div>
 
                 <div style={{ marginTop: "24px", display: "flex", justifyContent: "flex-end" }}>

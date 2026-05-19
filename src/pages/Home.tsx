@@ -11,6 +11,7 @@ export const Home: React.FC = () => {
   const [announcements, setAnnouncements] = useState<any[]>([]);
   const [events, setEvents] = useState<any[]>([]);
   const [gallery, setGallery] = useState<any[]>([]);
+  const [profile, setProfile] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   // Set document title
@@ -45,11 +46,12 @@ export const Home: React.FC = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [newsRes, announcementsRes, eventsRes, galleryRes] = await Promise.all([
+        const [newsRes, announcementsRes, eventsRes, galleryRes, profileRes] = await Promise.all([
           api.getNews({ limit: 6 }),
           api.getAnnouncements(),
           api.getEvents(),
           api.getGallery(),
+          api.getProfile().catch(() => null),
         ]);
         
         // Filter latest news
@@ -58,6 +60,9 @@ export const Home: React.FC = () => {
         setAnnouncements(announcementsRes.slice(0, 3));
         setEvents(eventsRes.slice(0, 3));
         setGallery(galleryRes.slice(0, 4));
+        if (profileRes) {
+          setProfile(profileRes);
+        }
       } catch (err) {
         console.error("Gagal memuat data utama:", err);
       } finally {
@@ -158,26 +163,30 @@ export const Home: React.FC = () => {
         <div className="container welcome-grid">
           <div className="welcome-img-wrap">
             <img
-              src="https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&q=80&w=600"
-              alt="Kepala Sekolah SDN Kalisalak 01"
+              src={profile?.sambutan_foto || "https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&q=80&w=600"}
+              alt={profile?.sambutan_nama || "Kepala Sekolah SDN Kalisalak 01"}
               className="welcome-img"
             />
           </div>
           <div className="welcome-content">
             <h3>Sambutan Kepala Sekolah</h3>
-            <h2>Mewujudkan Sekolah Sehat & Berprestasi</h2>
-            <p>
-              Assalamu'alaikum Warahmatullahi Wabarakatuh,
-            </p>
-            <p>
-              Salam sejahtera bagi kita semua. Kami ucapkan selamat datang di website portal resmi SDN Kalisalak 01 Margasari. Melalui platform digital ini, kami berkomitmen untuk menyediakan sarana informasi yang cepat, transparan, dan terpercaya bagi seluruh wali murid, guru, staf, serta masyarakat umum mengenai seluruh kegiatan dan perkembangan di sekolah kami.
-            </p>
-            <p>
-              Sebagai salah satu sekolah dasar unggulan di Kabupaten Tegal, kami berdedikasi tinggi untuk melahirkan tunas-tunas bangsa yang berkarakter islami/religius, sehat fisik dan mental, serta kompetitif dalam prestasi akademis maupun non-akademis. Kami percaya sinergi yang kuat antara sekolah, orang tua, dan masyarakat adalah kunci utama kesuksesan belajar anak didik kita.
-            </p>
+            <h2>{profile?.sambutan_judul || "Mewujudkan Sekolah Sehat & Berprestasi"}</h2>
+            {profile?.sambutan_isi ? (
+              <div dangerouslySetInnerHTML={{ __html: profile.sambutan_isi }} className="rich-content" />
+            ) : (
+              <>
+                <p>Assalamu'alaikum Warahmatullahi Wabarakatuh,</p>
+                <p>
+                  Salam sejahtera bagi kita semua. Kami ucapkan selamat datang di website portal resmi SDN Kalisalak 01 Margasari. Melalui platform digital ini, kami berkomitmen untuk menyediakan sarana informasi yang cepat, transparan, dan terpercaya bagi seluruh wali murid, guru, staf, serta masyarakat umum mengenai seluruh kegiatan dan perkembangan di sekolah kami.
+                </p>
+                <p>
+                  Sebagai salah satu sekolah dasar unggulan di Kabupaten Tegal, kami berdedikasi tinggi untuk melahirkan tunas-tunas bangsa yang berkarakter islami/religius, sehat fisik dan mental, serta kompetitif dalam prestasi akademis maupun non-akademis. Kami percaya sinergi yang kuat antara sekolah, orang tua, dan masyarakat adalah kunci utama kesuksesan belajar anak didik kita.
+                </p>
+              </>
+            )}
             <div className="welcome-author">
-              <h4>Bambang Setiawan, S.Pd., M.Pd.</h4>
-              <p>Kepala Sekolah SDN Kalisalak 01</p>
+              <h4>{profile?.sambutan_nama || "Bambang Setiawan, S.Pd., M.Pd."}</h4>
+              <p>{profile?.sambutan_jabatan || "Kepala Sekolah SDN Kalisalak 01"}</p>
             </div>
           </div>
         </div>
