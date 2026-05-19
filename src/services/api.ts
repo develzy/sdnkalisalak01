@@ -377,4 +377,51 @@ export const api = {
     }
     return await res.json();
   },
+
+  // ----------------------------------------------------------------
+  // HERO SLIDES
+  // ----------------------------------------------------------------
+  getSlides: async (): Promise<any[]> => {
+    const res = await fetch(`${API_BASE}/api/slides`);
+    if (!res.ok) throw new Error("Gagal memuat data slider");
+    return await res.json();
+  },
+
+  createSlide: async (data: any): Promise<{ success: boolean; id: number }> => {
+    const res = await fetch(`${API_BASE}/api/slides`, {
+      method: "POST",
+      headers: getHeaders(),
+      body: JSON.stringify(data),
+    });
+    if (!res.ok) {
+      const err = await res.json();
+      throw new Error(err.error || "Gagal menambahkan slide");
+    }
+    return await res.json();
+  },
+
+  updateSlide: async (id: number, data: any): Promise<{ success: boolean }> => {
+    const res = await fetch(`${API_BASE}/api/slides/${id}`, {
+      method: "PUT",
+      headers: getHeaders(),
+      body: JSON.stringify(data),
+    });
+    if (!res.ok) {
+      const err = await res.json();
+      throw new Error(err.error || "Gagal memperbarui slide");
+    }
+    return await res.json();
+  },
+
+  deleteSlide: async (id: number): Promise<{ success: boolean }> => {
+    const res = await fetch(`${API_BASE}/api/slides/${id}`, {
+      method: "DELETE",
+      headers: getHeaders(),
+    });
+    if (!res.ok) {
+      const err = await res.json();
+      throw new Error(err.error || "Gagal menghapus slide");
+    }
+    return await res.json();
+  },
 };

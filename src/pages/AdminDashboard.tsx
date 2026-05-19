@@ -16,7 +16,8 @@ import {
   EyeOff,
   Upload,
   X,
-  School
+  School,
+  SlidersHorizontal
 } from "lucide-react";
 import { api } from "../services/api";
 import { Toast } from "../components/Toast";
@@ -37,7 +38,7 @@ export const AdminDashboard: React.FC = () => {
   const [isLoggingIn, setIsLoggingIn] = useState(false);
 
   // Active Tab
-  const [activeTab, setActiveTab] = useState<"stats" | "news" | "announcements" | "events" | "staff" | "gallery" | "profile">("stats");
+  const [activeTab, setActiveTab] = useState<"stats" | "news" | "announcements" | "events" | "staff" | "gallery" | "profile" | "slides">("stats");
 
   // School Profile Form State
   const [profNama, setProfNama] = useState("");
@@ -69,7 +70,20 @@ export const AdminDashboard: React.FC = () => {
   const [events, setEvents] = useState<any[]>([]);
   const [staff, setStaff] = useState<any[]>([]);
   const [gallery, setGallery] = useState<any[]>([]);
+  const [slides, setSlides] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+
+  // Slide Form State
+  const [slideId, setSlideId] = useState<number | null>(null);
+  const [slideEditMode, setSlideEditMode] = useState(false);
+  const [slideBadge, setSlideBadge] = useState("");
+  const [slideTitle, setSlideTitle] = useState("");
+  const [slideDesc, setSlideDesc] = useState("");
+  const [slideImageUrl, setSlideImageUrl] = useState("");
+  const [slideCloudinaryId, setSlideCloudinaryId] = useState("");
+  const [slideFile, setSlideFile] = useState<File | null>(null);
+  const [slideOrderWeight, setSlideOrderWeight] = useState(0);
+  const [isSavingSlide, setIsSavingSlide] = useState(false);
 
   // Modals & Action States
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -165,6 +179,10 @@ export const AdminDashboard: React.FC = () => {
         } else if (activeTab === "gallery") {
           const galData = await api.getGallery();
           setGallery(galData);
+        } else if (activeTab === "slides") {
+          const slidesData = await api.getSlides();
+          setSlides(slidesData);
+          setSlideEditMode(false);
         } else if (activeTab === "profile") {
           const profileData = await api.getProfile();
           if (profileData) {
@@ -568,6 +586,89 @@ export const AdminDashboard: React.FC = () => {
     }
   };
 
+  // Slide form helpers
+  const handleSlideEdit = (slide: any) => {
+    setSlideId(slide.id);
+    setSlideBadge(slide.badge);
+    setSlideTitle(slide.title);
+    setSlideDesc(slide.description);
+    setSlideImageUrl(slide.image_url);
+    setSlideCloudinaryId(slide.cloudinary_id || "");
+    setSlideOrderWeight(slide.order_weight || 0);
+    setSlideFile(null);
+    setSlideEditMode(true);
+  };
+
+  const handleSlideNew = () => {
+    setSlideId(null);
+    setSlideBadge("");
+    setSlideTitle("");
+    setSlideDesc("");
+    setSlideImageUrl("");
+    setSlideCloudinaryId("");
+    setSlideOrderWeight(slides.length + 1);
+    setSlideFile(null);
+    setSlideEditMode(true);
+  };
+
+  const handleSlideCancel = () => {
+    setSlideEditMode(false);
+  };
+
+  const handleSlideSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSavingSlide(true);
+    try {
+      let finalUrl = slideImageUrl;
+      let finalCloudinaryId = slideCloudinaryId;
+
+      if (slideFile) {
+        const uploadRes = await handleCloudinaryUpload(slideFile);
+        finalUrl = uploadRes.url;
+        finalCloudinaryId = uploadRes.public_id;
+      }
+
+      const payload = {
+        image_url: finalUrl,
+        cloudinary_id: finalCloudinaryId || undefined,
+        badge: slideBadge,
+        title: slideTitle,
+        description: slideDesc,
+        order_weight: slideOrderWeight,
+      };
+
+      if (slideId) {
+        await api.updateSlide(slideId, payload);
+        addToast("Slide berhasil diperbarui!", "success");
+      } else {
+        await api.createSlide(payload);
+        addToast("Slide baru berhasil ditambahkan!", "success");
+      }
+
+      const refreshed = await api.getSlides();
+      setSlides(refreshed);
+      setSlideEditMode(false);
+    } catch (err: any) {
+      addToast(err.message || "Gagal menyimpan slide", "danger");
+    } finally {
+      setIsSavingSlide(false);
+    }
+  };
+
+  const handleSlideDelete = async (id: number) => {
+    if (!window.confirm("Hapus slide ini dari beranda?")) return;
+    setIsLoading(true);
+    try {
+      await api.deleteSlide(id);
+      setSlides((prev) => prev.filter((s) => s.id !== id));
+      addToast("Slide berhasil dihapus!", "success");
+    } catch (err: any) {
+      addToast(err.message || "Gagal menghapus slide", "danger");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const formatSqlDate = (dateStr: string) => {
     try {
       const d = new Date(dateStr);
@@ -701,6 +802,9 @@ export const AdminDashboard: React.FC = () => {
           <button onClick={() => setActiveTab("profile")} className={`dashboard-tab-btn ${activeTab === "profile" ? "active" : ""}`}>
             <School size={16} /> Profil Sekolah
           </button>
+          <button onClick={() => setActiveTab("slides")} className={`dashboard-tab-btn ${activeTab === "slides" ? "active" : ""}`}>
+            <SlidersHorizontal size={16} /> Slider Beranda
+          </button>
         </aside>
 
         {/* Content Panel */}
@@ -766,8 +870,95 @@ export const AdminDashboard: React.FC = () => {
             </div>
           )}
 
+          {/* SLIDER BERANDA MANAGEMENT PANEL */}
+          {activeTab === "slides" && (
+            <div>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px" }}>
+                <h2 style={{ fontSize: "20px", color: "var(--primary)" }}>Kelola Slider Beranda</h2>
+                {!slideEditMode && (
+                  <button onClick={handleSlideNew} className="btn btn-primary" style={{ padding: "8px 16px", fontSize: "13px" }}>
+                    <Plus size={16} /> Tambah Slide
+                  </button>
+                )}
+              </div>
+
+              {/* Slide Form */}
+              {slideEditMode && (
+                <div className="profile-card" style={{ marginBottom: "24px", border: "2px solid var(--primary-light, #dbeafe)" }}>
+                  <h3 style={{ marginBottom: "16px", fontSize: "16px" }}>{slideId ? "✏️ Edit Slide" : "➕ Tambah Slide Baru"}</h3>
+                  <form onSubmit={handleSlideSubmit}>
+                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px" }}>
+                      <div className="form-group">
+                        <label className="form-label">Label / Badge</label>
+                        <input type="text" className="form-control" value={slideBadge} onChange={(e) => setSlideBadge(e.target.value)} placeholder="Contoh: Prestasi Utama" required />
+                      </div>
+                      <div className="form-group">
+                        <label className="form-label">Urutan Tampil (angka kecil = pertama)</label>
+                        <input type="number" className="form-control" value={slideOrderWeight} onChange={(e) => setSlideOrderWeight(parseInt(e.target.value))} min={1} required />
+                      </div>
+                    </div>
+                    <div className="form-group">
+                      <label className="form-label">Judul Slide</label>
+                      <input type="text" className="form-control" value={slideTitle} onChange={(e) => setSlideTitle(e.target.value)} placeholder="Contoh: Selamat Datang di SDN Kalisalak 01" required />
+                    </div>
+                    <div className="form-group">
+                      <label className="form-label">Deskripsi Singkat</label>
+                      <textarea rows={2} className="form-control" value={slideDesc} onChange={(e) => setSlideDesc(e.target.value)} placeholder="Tulis keterangan singkat untuk slide ini..." required />
+                    </div>
+                    <div className="form-group">
+                      <label className="form-label" style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                        <Upload size={14} /> Upload Foto Slide ke Cloudinary
+                      </label>
+                      <input type="file" className="form-control" accept="image/*" onChange={(e) => setSlideFile(e.target.files ? e.target.files[0] : null)} />
+                      <p style={{ fontSize: "11px", color: "var(--text-muted)", marginTop: "4px" }}>Atau gunakan URL gambar langsung di bawah.</p>
+                    </div>
+                    <div className="form-group">
+                      <label className="form-label">URL Gambar (Jika tidak upload file)</label>
+                      <input type="text" className="form-control" value={slideImageUrl} onChange={(e) => setSlideImageUrl(e.target.value)} placeholder="https://..." />
+                      {slideImageUrl && (
+                        <img src={slideImageUrl} alt="preview" style={{ marginTop: "8px", width: "100%", height: "120px", objectFit: "cover", borderRadius: "8px" }} />
+                      )}
+                    </div>
+                    <div style={{ display: "flex", justifyContent: "flex-end", gap: "12px", marginTop: "16px", borderTop: "1px solid var(--border)", paddingTop: "16px" }}>
+                      <button type="button" onClick={handleSlideCancel} className="btn btn-outline" disabled={isSavingSlide}>Batal</button>
+                      <button type="submit" className="btn btn-primary" disabled={isSavingSlide || isUploadingImage}>
+                        {isSavingSlide || isUploadingImage ? "Menyimpan..." : "Simpan Slide"}
+                      </button>
+                    </div>
+                  </form>
+                </div>
+              )}
+
+              {/* Slide Cards */}
+              {isLoading && <p style={{ color: "var(--text-muted)" }}>Memuat data...</p>}
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: "16px" }}>
+                {slides.map((slide) => (
+                  <div key={slide.id} className="profile-card" style={{ padding: "0", overflow: "hidden" }}>
+                    <img src={slide.image_url} alt={slide.title} style={{ width: "100%", height: "140px", objectFit: "cover" }} />
+                    <div style={{ padding: "12px 16px" }}>
+                      <span style={{ fontSize: "11px", fontWeight: 700, color: "var(--secondary)", textTransform: "uppercase", letterSpacing: "0.5px" }}>{slide.badge}</span>
+                      <h4 style={{ fontSize: "14px", marginTop: "4px", marginBottom: "4px", fontWeight: 700 }}>{slide.title}</h4>
+                      <p style={{ fontSize: "12px", color: "var(--text-muted)", marginBottom: "12px" }}>{slide.description}</p>
+                      <div style={{ display: "flex", gap: "8px" }}>
+                        <button onClick={() => handleSlideEdit(slide)} className="btn btn-outline" style={{ fontSize: "12px", padding: "6px 12px", flex: 1 }}>
+                          <Edit size={12} /> Edit
+                        </button>
+                        <button onClick={() => handleSlideDelete(slide.id)} className="btn btn-outline" style={{ fontSize: "12px", padding: "6px 12px", color: "var(--danger)", borderColor: "var(--danger)" }}>
+                          <Trash2 size={12} />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              {slides.length === 0 && !isLoading && (
+                <p style={{ color: "var(--text-muted)", textAlign: "center", padding: "40px" }}>Belum ada slide. Klik "Tambah Slide" untuk mulai.</p>
+              )}
+            </div>
+          )}
+
           {/* CRUD TABLES (News, Ann, Event, Staff, Gallery) */}
-          {activeTab !== "stats" && activeTab !== "profile" && (
+          {activeTab !== "stats" && activeTab !== "profile" && activeTab !== "slides" && (
             <div>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px" }}>
                 <h2 style={{ fontSize: "20px", color: "var(--primary)", textTransform: "capitalize" }}>

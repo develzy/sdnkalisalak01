@@ -12,6 +12,7 @@ export const Home: React.FC = () => {
   const [events, setEvents] = useState<any[]>([]);
   const [gallery, setGallery] = useState<any[]>([]);
   const [profile, setProfile] = useState<any>(null);
+  const [slides, setSlides] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   // Set document title
@@ -21,37 +22,18 @@ export const Home: React.FC = () => {
   
   // Slider State
   const [currentSlide, setCurrentSlide] = useState(0);
-  const slides = [
-    {
-      image: "https://images.unsplash.com/photo-1546410531-bb4caa6b424d?auto=format&fit=crop&q=80&w=1200",
-      badge: "Prestasi Utama",
-      title: "Selamat Datang di SDN Kalisalak 01",
-      desc: "Membentuk generasi cerdas, berkarakter, inovatif, dan berakhlak mulia berlandaskan iman dan takwa.",
-    },
-    {
-      image: "https://images.unsplash.com/photo-1503676260728-1c00da094a0b?auto=format&fit=crop&q=80&w=1200",
-      badge: "Kegiatan Sekolah",
-      title: "Penerapan Kurikulum Merdeka",
-      desc: "Mengembangkan potensi bakat dan kreativitas anak didik secara optimal melalui Proyek Penguatan Profil Pelajar Pancasila.",
-    },
-    {
-      image: "https://images.unsplash.com/photo-1427504494785-3a9ca7044f45?auto=format&fit=crop&q=80&w=1200",
-      badge: "Lingkungan Sehat",
-      title: "Juara 1 Lomba Sekolah Sehat",
-      desc: "Berkomitmen mewujudkan lingkungan belajar yang bersih, rindang, aman, nyaman, dan ramah anak.",
-    },
-  ];
 
   // Fetch all needed dashboard data
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [newsRes, announcementsRes, eventsRes, galleryRes, profileRes] = await Promise.all([
+        const [newsRes, announcementsRes, eventsRes, galleryRes, profileRes, slidesRes] = await Promise.all([
           api.getNews({ limit: 6 }),
           api.getAnnouncements(),
           api.getEvents(),
           api.getGallery(),
           api.getProfile().catch(() => null),
+          api.getSlides().catch(() => []),
         ]);
         
         // Filter latest news
@@ -60,9 +42,8 @@ export const Home: React.FC = () => {
         setAnnouncements(announcementsRes.slice(0, 3));
         setEvents(eventsRes.slice(0, 3));
         setGallery(galleryRes.slice(0, 4));
-        if (profileRes) {
-          setProfile(profileRes);
-        }
+        if (profileRes) setProfile(profileRes);
+        if (slidesRes.length > 0) setSlides(slidesRes);
       } catch (err) {
         console.error("Gagal memuat data utama:", err);
       } finally {
@@ -107,13 +88,13 @@ export const Home: React.FC = () => {
       <section className="hero">
         <div className="hero-slider">
           {slides.map((slide, index) => (
-            <div key={index} className={`hero-slide ${index === currentSlide ? "active" : ""}`}>
-              <img src={slide.image} alt={slide.title} className="hero-image" />
+            <div key={slide.id ?? index} className={`hero-slide ${index === currentSlide ? "active" : ""}`}>
+              <img src={slide.image_url} alt={slide.title} className="hero-image" />
               <div className="container">
                 <div className="hero-content">
                   <span className="hero-badge">{slide.badge}</span>
                   <h2 className="hero-title">{slide.title}</h2>
-                  <p className="hero-desc">{slide.desc}</p>
+                  <p className="hero-desc">{slide.description}</p>
                   <div style={{ display: "flex", gap: "12px" }}>
                     <Link to="/profil" className="btn btn-secondary">
                       Profil Sekolah

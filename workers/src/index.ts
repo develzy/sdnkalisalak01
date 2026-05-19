@@ -840,6 +840,66 @@ export default {
         }
       }
 
+      // -------------------------------------------------------------
+      // HERO SLIDES ENDPOINTS
+      // -------------------------------------------------------------
+      if (pathParts[1] === "slides") {
+        // GET /api/slides — public
+        if (pathParts.length === 2 && method === "GET") {
+          const { results } = await env.DB.prepare(
+            "SELECT * FROM hero_slides ORDER BY order_weight ASC"
+          ).all();
+          return new Response(JSON.stringify(results), { status: 200, headers: corsHeaders });
+        }
+
+        // POST /api/slides — Auth required
+        if (pathParts.length === 2 && method === "POST") {
+          if (!(await authorize(request, env))) {
+            return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers: corsHeaders });
+          }
+          const body: any = await request.json();
+          const { image_url, cloudinary_id, badge, title, description, order_weight } = body;
+          if (!image_url || !badge || !title || !description) {
+            return new Response(JSON.stringify({ error: "Missing required fields" }), { status: 400, headers: corsHeaders });
+          }
+          const info = await env.DB.prepare(
+            "INSERT INTO hero_slides (image_url, cloudinary_id, badge, title, description, order_weight) VALUES (?, ?, ?, ?, ?, ?)"
+          ).bind(image_url, cloudinary_id || null, badge, title, description, order_weight || 0).run();
+          return new Response(JSON.stringify({ success: true, id: info.meta.last_row_id }), { status: 201, headers: corsHeaders });
+        }
+
+        // PUT /api/slides/:id — Auth required
+        if (pathParts.length === 3 && method === "PUT") {
+          if (!(await authorize(request, env))) {
+            return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers: corsHeaders });
+          }
+          const id = parseInt(pathParts[2]);
+          const body: any = await request.json();
+          const { image_url, cloudinary_id, badge, title, description, order_weight } = body;
+          if (!image_url || !badge || !title || !description) {
+            return new Response(JSON.stringify({ error: "Missing required fields" }), { status: 400, headers: corsHeaders });
+          }
+          await env.DB.prepare(
+            "UPDATE hero_slides SET image_url=?, cloudinary_id=?, badge=?, title=?, description=?, order_weight=? WHERE id=?"
+          ).bind(image_url, cloudinary_id || null, badge, title, description, order_weight || 0, id).run();
+          return new Response(JSON.stringify({ success: true }), { status: 200, headers: corsHeaders });
+        }
+
+        // DELETE /api/slides/:id — Auth required
+        if (pathParts.length === 3 && method === "DELETE") {
+          if (!(await authorize(request, env))) {
+            return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers: corsHeaders });
+          }
+          const id = parseInt(pathParts[2]);
+          const slide: any = await env.DB.prepare("SELECT cloudinary_id FROM hero_slides WHERE id=?").bind(id).first();
+          if (slide?.cloudinary_id) {
+            await deleteFromCloudinary(slide.cloudinary_id, env);
+          }
+          await env.DB.prepare("DELETE FROM hero_slides WHERE id=?").bind(id).run();
+          return new Response(JSON.stringify({ success: true }), { status: 200, headers: corsHeaders });
+        }
+      }
+
       // If no endpoint matches
       return new Response(JSON.stringify({ error: "Endpoint not found" }), {
         status: 404,
