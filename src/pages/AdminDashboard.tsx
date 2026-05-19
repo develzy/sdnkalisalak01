@@ -564,9 +564,6 @@ export const AdminDashboard: React.FC = () => {
             </button>
           </form>
           
-          <div style={{ textAlign: "center", marginTop: "20px" }}>
-            <p style={{ fontSize: "11px", color: "var(--text-muted)" }}>Gunakan Akun Default: <strong>admin</strong> / <strong>admin123</strong></p>
-          </div>
         </div>
       </div>
     );
