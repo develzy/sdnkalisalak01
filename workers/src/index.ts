@@ -1,3 +1,5 @@
+/// <reference types="@cloudflare/workers-types" />
+
 export interface Env {
   DB: D1Database;
   CLOUDINARY_CLOUD_NAME: string;
@@ -779,6 +781,59 @@ export default {
             }),
             { status: 200, headers: corsHeaders }
           );
+        }
+      }
+
+      // -------------------------------------------------------------
+      // SCHOOL PROFILE ENDPOINTS
+      // -------------------------------------------------------------
+      if (pathParts[1] === "profile") {
+        // GET /api/profile
+        if (pathParts.length === 2 && method === "GET") {
+          const profile = await env.DB.prepare("SELECT * FROM school_profile WHERE id = 1").first();
+          if (!profile) {
+            return new Response(JSON.stringify({ error: "Profile not found" }), {
+              status: 404,
+              headers: corsHeaders,
+            });
+          }
+          return new Response(JSON.stringify(profile), { status: 200, headers: corsHeaders });
+        }
+
+        // PUT /api/profile (Auth required)
+        if (pathParts.length === 2 && method === "PUT") {
+          if (!(await authorize(request, env))) {
+            return new Response(JSON.stringify({ error: "Unauthorized" }), {
+              status: 401,
+              headers: corsHeaders,
+            });
+          }
+
+          const body: any = await request.json();
+          const {
+            nama_sekolah, npsn, akreditasi, bentuk_pendidikan, status_sekolah,
+            jenjang_pendidikan, sk_pendirian, kurikulum, alamat, sejarah, visi, misi, fasilitas
+          } = body;
+
+          if (!nama_sekolah || !npsn || !akreditasi) {
+            return new Response(JSON.stringify({ error: "Missing required fields" }), {
+              status: 400,
+              headers: corsHeaders,
+            });
+          }
+
+          await env.DB.prepare(`
+            UPDATE school_profile SET
+              nama_sekolah = ?, npsn = ?, akreditasi = ?, bentuk_pendidikan = ?, status_sekolah = ?,
+              jenjang_pendidikan = ?, sk_pendirian = ?, kurikulum = ?, alamat = ?, sejarah = ?,
+              visi = ?, misi = ?, fasilitas = ?
+            WHERE id = 1
+          `).bind(
+            nama_sekolah, npsn, akreditasi, bentuk_pendidikan, status_sekolah,
+            jenjang_pendidikan, sk_pendirian, kurikulum, alamat, sejarah, visi, misi, fasilitas
+          ).run();
+
+          return new Response(JSON.stringify({ success: true }), { status: 200, headers: corsHeaders });
         }
       }
 
