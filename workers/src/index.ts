@@ -329,17 +329,28 @@ export default {
           const newsId = parseInt(pathParts[2]);
 
           if (method === "GET") {
+            // Fetch all comments for this article, ordered oldest first
             const { results } = await env.DB.prepare(
-              "SELECT * FROM comments WHERE news_id = ? ORDER BY created_at DESC"
+              "SELECT * FROM comments WHERE news_id = ? ORDER BY created_at ASC"
             )
               .bind(newsId)
               .all();
-            return new Response(JSON.stringify(results), { status: 200, headers: corsHeaders });
+
+            // Build nested structure: top-level + replies
+            const topLevel = results.filter((c: any) => !c.parent_id);
+            const replies = results.filter((c: any) => !!c.parent_id);
+
+            const nested = topLevel.map((comment: any) => ({
+              ...comment,
+              replies: replies.filter((r: any) => r.parent_id === comment.id),
+            }));
+
+            return new Response(JSON.stringify(nested), { status: 200, headers: corsHeaders });
           }
 
           if (method === "POST") {
             const body: any = await request.json();
-            const { author_name, comment_text } = body;
+            const { author_name, comment_text, parent_id } = body;
 
             if (!author_name || !comment_text) {
               return new Response(JSON.stringify({ error: "Name and comment text are required" }), {
@@ -349,9 +360,9 @@ export default {
             }
 
             const info = await env.DB.prepare(
-              "INSERT INTO comments (news_id, author_name, comment_text) VALUES (?, ?, ?)"
+              "INSERT INTO comments (news_id, author_name, comment_text, parent_id) VALUES (?, ?, ?, ?)"
             )
-              .bind(newsId, author_name, comment_text)
+              .bind(newsId, author_name, comment_text, parent_id || null)
               .run();
 
             return new Response(
@@ -362,6 +373,8 @@ export default {
                   news_id: newsId,
                   author_name,
                   comment_text,
+                  parent_id: parent_id || null,
+                  replies: [],
                   created_at: new Date().toISOString(),
                 },
               }),

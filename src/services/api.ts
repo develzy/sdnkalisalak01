@@ -152,7 +152,7 @@ export const api = {
     return await res.json();
   },
 
-  addComment: async (newsId: number, comment: { author_name: string; comment_text: string }) => {
+  addComment: async (newsId: number, comment: { author_name: string; comment_text: string; parent_id?: number | null }) => {
     const res = await fetch(`${API_BASE}/api/news/${newsId}/comments`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },

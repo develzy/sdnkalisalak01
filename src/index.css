@@ -2047,6 +2047,12 @@ a {
     overflow: hidden;
   }
 
+  .hero-arrow {
+    width: 32px;
+    height: 32px;
+    font-size: 14px;
+  }
+
   .hero-content > div {
     flex-direction: column;
     gap: 8px !important;
