@@ -92,16 +92,7 @@ export const NewsList: React.FC = () => {
 
       <div className="container" style={{ marginBottom: "60px" }}>
         {/* Search and Filters Layout */}
-        <div
-          style={{
-            display: "flex",
-            flexWrap: "wrap",
-            justifyContent: "space-between",
-            alignItems: "center",
-            gap: "20px",
-            marginBottom: "32px",
-          }}
-        >
+        <div className="news-filter-bar">
           {/* Categories Tab list */}
           <div style={{ display: "flex", flexWrap: "wrap", gap: "8px" }}>
             <button

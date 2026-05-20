@@ -143,7 +143,7 @@ export const NewsDetail: React.FC = () => {
   }
 
   return (
-    <div className="container" style={{ padding: "40px 24px 80px 24px" }}>
+    <div className="container" style={{ padding: "32px 16px 80px 16px" }}>
       {/* Toast Notifier */}
       <div className="toast-container">
         {toasts.map((toast) => (
@@ -162,7 +162,7 @@ export const NewsDetail: React.FC = () => {
         </Link>
       </div>
 
-      <div style={{ display: "grid", gridTemplateColumns: "2.5fr 1fr", gap: "40px" }}>
+      <div className="news-detail-grid">
         {/* Main Content Column */}
         <article>
           <span
@@ -171,7 +171,7 @@ export const NewsDetail: React.FC = () => {
           >
             {article.category_name || "Berita"}
           </span>
-          <h1 style={{ fontSize: "36px", lineHeight: "1.2", marginBottom: "16px", color: "var(--text)" }}>
+          <h1 className="news-detail-title">
             {article.title}
           </h1>
 
@@ -198,16 +198,7 @@ export const NewsDetail: React.FC = () => {
             </span>
           </div>
 
-          <div
-            style={{
-              width: "100%",
-              height: "400px",
-              borderRadius: "var(--radius)",
-              overflow: "hidden",
-              marginBottom: "32px",
-              border: "1px solid var(--border)",
-            }}
-          >
+          <div className="news-detail-hero-img">
             <img
               src={article.image_url || "https://images.unsplash.com/photo-1546410531-bb4caa6b424d?auto=format&fit=crop&q=80&w=800"}
               alt={article.title}
@@ -223,49 +214,38 @@ export const NewsDetail: React.FC = () => {
           ></div>
 
           {/* Share Section */}
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "12px",
-              padding: "20px",
-              backgroundColor: "var(--surface)",
-              border: "1px solid var(--border)",
-              borderRadius: "var(--radius)",
-              marginBottom: "40px",
-            }}
-          >
-            <span style={{ fontWeight: 700, display: "flex", alignItems: "center", gap: "6px" }}>
-              <Share2 size={16} /> Bagikan Kabar:
+          <div className="news-share-section">
+            <span style={{ fontWeight: 700, display: "flex", alignItems: "center", gap: "6px", flexShrink: 0 }}>
+              <Share2 size={16} /> Bagikan:
             </span>
-            <div style={{ display: "flex", gap: "8px" }}>
+            <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
               <button
                 className="btn btn-outline"
-                style={{ padding: "6px 12px", fontSize: "12px", borderColor: "#25d366", color: "#25d366" }}
+                style={{ padding: "6px 14px", fontSize: "12px", borderColor: "#25d366", color: "#25d366" }}
                 onClick={() => shareArticle("wa")}
               >
                 WhatsApp
               </button>
               <button
                 className="btn btn-outline"
-                style={{ padding: "6px 12px", fontSize: "12px", borderColor: "#1877f2", color: "#1877f2" }}
+                style={{ padding: "6px 14px", fontSize: "12px", borderColor: "#1877f2", color: "#1877f2" }}
                 onClick={() => shareArticle("fb")}
               >
                 Facebook
               </button>
               <button
                 className="btn btn-outline"
-                style={{ padding: "6px 12px", fontSize: "12px", borderColor: "#0088cc", color: "#0088cc" }}
+                style={{ padding: "6px 14px", fontSize: "12px", borderColor: "#0088cc", color: "#0088cc" }}
                 onClick={() => shareArticle("tg")}
               >
                 Telegram
               </button>
               <button
                 className="btn btn-primary"
-                style={{ padding: "6px 12px", fontSize: "12px" }}
+                style={{ padding: "6px 14px", fontSize: "12px" }}
                 onClick={() => shareArticle("copy")}
               >
-                Salin Tautan
+                Salin
               </button>
             </div>
           </div>
