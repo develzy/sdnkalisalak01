@@ -285,7 +285,7 @@ export const Home: React.FC = () => {
 
       {/* 6. Pengumuman & Agenda Grid */}
       <section style={{ padding: "48px 0" }}>
-        <div className="container" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "40px" }}>
+        <div className="container home-two-col">
           {/* Announcements Col */}
           <div>
             <div className="section-title-wrap">
